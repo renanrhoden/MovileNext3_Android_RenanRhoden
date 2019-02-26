@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.renanrhoden.wheretolunch.R
@@ -29,15 +30,25 @@ class RestaurantStackActivity : AppCompatActivity() {
     private var location: Location? = null
     val LOCATION_PORMISSION_REQUEST_CODE = 1010
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        observeViewModel()
 
         requestLocationPermission()
 
         val manager = CardStackLayoutManager(this)
         val adapter = null
+    }
+
+    private fun observeViewModel() {
+        stackViewModel.onSuccess.observe(this, Observer {
+
+        })
+
+        stackViewModel.onError.observe(this, Observer {
+
+        })
     }
 
     private fun requestLocationPermission() {
@@ -61,22 +72,7 @@ class RestaurantStackActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         fusedLocationClient.lastLocation.addOnSuccessListener {
-            it?.let {
-                GlobalScope.launch {
-                    val response =
-                        retrofit.create(PlacesApi::class.java).getPlaces("${it.latitude},${it.longitude}").await()
-                    if (response.isSuccessful) {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@RestaurantStackActivity,
-                                response.body()?.results?.first()?.name,
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
-                    }
-                }
-            }
+
         }
     }
 
