@@ -1,4 +1,4 @@
-package com.renanrhoden.wheretolunch.ui.restaurantlisting
+package com.renanrhoden.wheretolunch.feature.restaurantlisting
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

@@ -1,6 +1,7 @@
-package com.renanrhoden.wheretolunch.ui.restaurantstack
+package com.renanrhoden.wheretolunch.feature.restaurantstack
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -9,35 +10,56 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import androidx.lifecycle.Observer
+import com.google.android.gms.location.*
 import com.renanrhoden.wheretolunch.R
 import com.renanrhoden.wheretolunch.databinding.ActivityMainBinding
-import com.renanrhoden.wheretolunch.service.PlacesApi
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
-import retrofit2.Retrofit
-
 
 class RestaurantStackActivity : AppCompatActivity() {
 
-    val stackViewModel: RestaurantStackViewModel by viewModel()
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var location: Location? = null
-    val LOCATION_PORMISSION_REQUEST_CODE = 1010
+    private val LOCATION_PORMISSION_REQUEST_CODE = 1010
+    private val stackViewModel: RestaurantStackViewModel by viewModel()
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(location: LocationResult?) {
+            super.onLocationResult(location)
+            location ?: return
 
+            location.lastLocation.run {
+                stackViewModel.loadRestaurants(latitude, longitude)
+            }
+        }
+    }
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         requestLocationPermission()
 
         val manager = CardStackLayoutManager(this)
-        val adapter = null
+        val adapter = RestaurantStackAdapter()
+        binding.cardStackView.layoutManager = manager
+        binding.cardStackView.adapter = adapter
+
+        binding.viewModel = stackViewModel
+        observeViewModel(adapter)
+    }
+
+    private fun observeViewModel(adapter: RestaurantStackAdapter) {
+        stackViewModel.onSuccess.observe(this, Observer {
+            adapter.list = it
+        })
+
+        stackViewModel.onError.observe(this, Observer {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        })
+        stackViewModel.swipe.observe(this, Observer {
+            binding.cardStackView.swipe()
+        })
     }
 
     private fun requestLocationPermission() {
@@ -57,26 +79,13 @@ class RestaurantStackActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun onLocationGranted() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         fusedLocationClient.lastLocation.addOnSuccessListener {
-            it?.let {
-                GlobalScope.launch {
-                    val response =
-                        retrofit.create(PlacesApi::class.java).getPlaces("${it.latitude},${it.longitude}").await()
-                    if (response.isSuccessful) {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@RestaurantStackActivity,
-                                response.body()?.results?.first()?.name,
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
-                    }
-                }
-            }
+            it?.run {
+                stackViewModel.loadRestaurants(latitude, longitude)
+            } ?: fusedLocationClient.requestLocationUpdates(LocationRequest.create(), locationCallback, null)
         }
     }
 
@@ -86,7 +95,7 @@ class RestaurantStackActivity : AppCompatActivity() {
     ) {
         when (requestCode) {
             LOCATION_PORMISSION_REQUEST_CODE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                if ((grantResults.isNotEmpty() && grantResults.first() == PackageManager.PERMISSION_GRANTED)) {
                     onLocationGranted()
                 } else {
                     requestLocationPermission()
