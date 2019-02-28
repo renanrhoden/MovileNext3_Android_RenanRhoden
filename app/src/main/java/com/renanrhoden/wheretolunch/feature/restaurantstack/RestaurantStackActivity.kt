@@ -11,8 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.renanrhoden.wheretolunch.R
 import com.renanrhoden.wheretolunch.databinding.ActivityMainBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
@@ -20,10 +19,19 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class RestaurantStackActivity : AppCompatActivity() {
 
-    val stackViewModel: RestaurantStackViewModel by viewModel()
+    private val LOCATION_PORMISSION_REQUEST_CODE = 1010
+    private val stackViewModel: RestaurantStackViewModel by viewModel()
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(location: LocationResult?) {
+            super.onLocationResult(location)
+            location ?: return
+
+            location.lastLocation.run {
+                stackViewModel.loadRestaurants(latitude, longitude)
+            }
+        }
+    }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var location: Location? = null
-    val LOCATION_PORMISSION_REQUEST_CODE = 1010
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +45,7 @@ class RestaurantStackActivity : AppCompatActivity() {
         binding.cardStackView.layoutManager = manager
         binding.cardStackView.adapter = adapter
 
+        binding.viewModel = stackViewModel
         observeViewModel(adapter)
     }
 
@@ -47,6 +56,9 @@ class RestaurantStackActivity : AppCompatActivity() {
 
         stackViewModel.onError.observe(this, Observer {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        })
+        stackViewModel.swipe.observe(this, Observer {
+            binding.cardStackView.swipe()
         })
     }
 
@@ -73,7 +85,7 @@ class RestaurantStackActivity : AppCompatActivity() {
         fusedLocationClient.lastLocation.addOnSuccessListener {
             it?.run {
                 stackViewModel.loadRestaurants(latitude, longitude)
-            } ?: fusedLocationClient.requestLocationUpdates(getLocation)
+            } ?: fusedLocationClient.requestLocationUpdates(LocationRequest.create(), locationCallback, null)
         }
     }
 
@@ -83,7 +95,7 @@ class RestaurantStackActivity : AppCompatActivity() {
     ) {
         when (requestCode) {
             LOCATION_PORMISSION_REQUEST_CODE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                if ((grantResults.isNotEmpty() && grantResults.first() == PackageManager.PERMISSION_GRANTED)) {
                     onLocationGranted()
                 } else {
                     requestLocationPermission()

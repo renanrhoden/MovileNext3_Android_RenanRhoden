@@ -18,6 +18,7 @@ class RestaurantStackViewModel(
 
     val onSuccess = MutableLiveData<List<RestaurantCardViewModel>>()
     val onError = MutableLiveData<String>()
+    val swipe = MutableLiveData<Unit>()
 
     fun loadRestaurants(latitude: Double, longitude: Double) {
         disposable = repository.getRestaurants(latitude, longitude)
@@ -44,6 +45,14 @@ class RestaurantStackViewModel(
         } else {
             onSuccess.value = it.subList(0, resultsSize)
         }
+    }
+
+    fun onLikeClick() {
+        swipe.value = Unit
+    }
+
+    fun onDislikeClick() {
+        swipe.value = Unit
     }
 
     override fun onCleared() {

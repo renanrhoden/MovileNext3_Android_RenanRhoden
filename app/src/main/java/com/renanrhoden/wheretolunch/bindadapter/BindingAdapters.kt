@@ -6,6 +6,7 @@ import com.squareup.picasso.Picasso
 
 @BindingAdapter("app:imageUrl")
 fun loadImage(view: ImageView, url: String) {
+    if (view.drawable != null) return
     Picasso
         .get().apply {
             isLoggingEnabled = true
@@ -14,5 +15,4 @@ fun loadImage(view: ImageView, url: String) {
         .fit()
         .centerCrop()
         .into(view)
-
 }
