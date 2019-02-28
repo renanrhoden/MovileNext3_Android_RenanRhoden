@@ -1,6 +1,6 @@
 package com.renanrhoden.wheretolunch.service
 
-import com.google.gson.annotations.SerializedName
+import com.renanrhoden.wheretolunch.model.Result
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -11,5 +11,5 @@ interface PlacesApi {
     fun getPlaces(@Query("location") latLong: String): Single<Result>
 }
 
-class Place(@SerializedName("name") val name: String)
-class Result(@SerializedName("results") val results: List<Place>)
+
+

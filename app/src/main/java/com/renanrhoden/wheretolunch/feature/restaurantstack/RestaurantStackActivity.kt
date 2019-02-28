@@ -1,4 +1,4 @@
-package com.renanrhoden.wheretolunch.ui.restaurantstack
+package com.renanrhoden.wheretolunch.feature.restaurantstack
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -14,14 +14,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.renanrhoden.wheretolunch.R
 import com.renanrhoden.wheretolunch.databinding.ActivityMainBinding
-import com.renanrhoden.wheretolunch.service.PlacesApi
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
-import retrofit2.Retrofit
-
 
 class RestaurantStackActivity : AppCompatActivity() {
 
@@ -29,25 +23,29 @@ class RestaurantStackActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var location: Location? = null
     val LOCATION_PORMISSION_REQUEST_CODE = 1010
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
-        observeViewModel()
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         requestLocationPermission()
 
         val manager = CardStackLayoutManager(this)
-        val adapter = null
+        val adapter = RestaurantStackAdapter()
+        binding.cardStackView.layoutManager = manager
+        binding.cardStackView.adapter = adapter
+
+        observeViewModel(adapter)
     }
 
-    private fun observeViewModel() {
+    private fun observeViewModel(adapter: RestaurantStackAdapter) {
         stackViewModel.onSuccess.observe(this, Observer {
-
+            adapter.list = it
         })
 
         stackViewModel.onError.observe(this, Observer {
-
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         })
     }
 

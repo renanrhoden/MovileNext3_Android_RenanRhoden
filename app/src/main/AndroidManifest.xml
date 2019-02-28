@@ -13,9 +13,9 @@
             android:name=".WhereToLunchApplication"
             android:supportsRtl="true"
             android:theme="@style/AppTheme" tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.restaurantlisting.RestaurantListingActivity">
+        <activity android:name=".feature.restaurantlisting.RestaurantListingActivity">
         </activity>
-        <activity android:name=".ui.restaurantstack.RestaurantStackActivity">
+        <activity android:name=".feature.restaurantstack.RestaurantStackActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
