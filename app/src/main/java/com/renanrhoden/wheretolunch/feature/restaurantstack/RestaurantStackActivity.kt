@@ -1,6 +1,7 @@
 package com.renanrhoden.wheretolunch.feature.restaurantstack
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -66,11 +67,13 @@ class RestaurantStackActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun onLocationGranted() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         fusedLocationClient.lastLocation.addOnSuccessListener {
-
+            it?.run {
+                stackViewModel.loadRestaurants(latitude, longitude)
+            } ?: fusedLocationClient.requestLocationUpdates(getLocation)
         }
     }
 

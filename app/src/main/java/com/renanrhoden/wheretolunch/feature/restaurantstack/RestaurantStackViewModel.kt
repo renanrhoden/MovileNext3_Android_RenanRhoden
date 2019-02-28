@@ -19,8 +19,8 @@ class RestaurantStackViewModel(
     val onSuccess = MutableLiveData<List<RestaurantCardViewModel>>()
     val onError = MutableLiveData<String>()
 
-    init {
-        disposable = repository.getRestaurants(-33.866651, 151.195827)
+    fun loadRestaurants(latitude: Double, longitude: Double) {
+        disposable = repository.getRestaurants(latitude, longitude)
             .subscribeBy(
                 onSuccess = { place ->
                     onRequestRestaurantsSuccess(place)
