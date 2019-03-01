@@ -29,7 +29,6 @@ class RestaurantStackViewModel(
     val onError = MutableLiveData<String>()
     val swipe = MutableLiveData<Direction>()
     val openRestaurantsLiked = MutableLiveData<List<Restaurant>>()
-    val all = restaurantsRepository.allRestaurants
 
     var places: List<Place>? = null
 
@@ -79,8 +78,12 @@ class RestaurantStackViewModel(
         if (direction == Direction.Right) {
             insertDatabaseSwipedRestaurant(topPosition)
         }
+
         if (topPosition == max_restaurants){
-            openRestaurantsLiked.value = all.value
+            restaurantsRepository.getAll()
+                .subscribeBy {
+                    openRestaurantsLiked.value = it
+                }
         }
     }
 

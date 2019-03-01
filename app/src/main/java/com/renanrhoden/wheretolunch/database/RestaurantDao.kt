@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.renanrhoden.wheretolunch.database.entities.Restaurant
+import io.reactivex.Single
 
 @Dao
 interface RestaurantDao {
@@ -17,5 +18,5 @@ interface RestaurantDao {
     fun insert(restaurant: Restaurant)
 
     @Query("SELECT * FROM restaurants")
-    fun getAll(): LiveData<List<Restaurant>>
+    fun getAll(): Single<List<Restaurant>>
 }
