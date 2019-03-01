@@ -1,5 +1,6 @@
 package com.renanrhoden.wheretolunch.feature.restaurantstack
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.renanrhoden.wheretolunch.database.entities.Restaurant
@@ -28,7 +29,7 @@ class RestaurantStackViewModel(
     val onError = MutableLiveData<String>()
     val swipe = MutableLiveData<Direction>()
     val openRestaurantsLiked = MutableLiveData<List<Restaurant>>()
-    val all = restaurantsRepository.getAllRestaurants()
+    val all = restaurantsRepository.allRestaurants
 
     var places: List<Place>? = null
 
@@ -85,7 +86,11 @@ class RestaurantStackViewModel(
 
     private fun insertDatabaseSwipedRestaurant(topPosition: Int) {
         places?.let {
-            restaurantsRepository.insert(toRestaurant(it[topPosition - 1]))
+            try {
+                restaurantsRepository.insert(toRestaurant(it[topPosition - 1]))
+            } catch (e: Throwable){
+                Log.i("DEBUG INSERT", e.message)
+            }
         }
     }
 }
