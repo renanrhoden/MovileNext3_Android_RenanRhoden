@@ -21,7 +21,7 @@ object RestaurantMapper {
             return Restaurant(
                 name,
                 address,
-                photos.first().photoReference
+                photos.firstOrNull()?.photoReference ?: ""
             )
         }
     }
