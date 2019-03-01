@@ -1,5 +1,6 @@
 package com.renanrhoden.wheretolunch.model
 
+import androidx.room.Entity
 import com.google.gson.annotations.SerializedName
 
 class Place(

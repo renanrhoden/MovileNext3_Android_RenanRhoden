@@ -1,7 +1,10 @@
 package com.renanrhoden.wheretolunch.injection
 
-import com.renanrhoden.wheretolunch.repositories.PlacesRepository
+import android.app.Application
+import com.renanrhoden.wheretolunch.database.RestaurantRoomDatabase
 import com.renanrhoden.wheretolunch.feature.restaurantstack.RestaurantStackViewModel
+import com.renanrhoden.wheretolunch.repositories.PlacesRepository
+import com.renanrhoden.wheretolunch.repositories.RestaurantRoomRepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.viewmodel.ext.koin.viewModel
@@ -15,7 +18,7 @@ class KoinModule {
 
     val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/"
 
-    fun getModule() = module {
+    fun getModule(application: Application) = module {
         single {
             val logging = HttpLoggingInterceptor()
             logging.level = HttpLoggingInterceptor.Level.BODY
@@ -30,6 +33,8 @@ class KoinModule {
                 .build()
         }
         single { PlacesRepository(get()) }
-        viewModel { RestaurantStackViewModel(get()) }
+        single { RestaurantRoomDatabase.getInstance(application) }
+        single { RestaurantRoomRepository(get()) }
+        viewModel { RestaurantStackViewModel(get(), get()) }
     }
 }

@@ -2,9 +2,11 @@ package com.renanrhoden.wheretolunch.feature.restaurantstack
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
+import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -14,10 +16,14 @@ import androidx.lifecycle.Observer
 import com.google.android.gms.location.*
 import com.renanrhoden.wheretolunch.R
 import com.renanrhoden.wheretolunch.databinding.ActivityMainBinding
+import com.renanrhoden.wheretolunch.feature.restaurantlisting.RestaurantListingActivity
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
+import com.yuyakaido.android.cardstackview.CardStackListener
+import com.yuyakaido.android.cardstackview.Direction
+import com.yuyakaido.android.cardstackview.SwipeAnimationSetting
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class RestaurantStackActivity : AppCompatActivity() {
+class RestaurantStackActivity : AppCompatActivity(), CardStackListener {
 
     private val LOCATION_PORMISSION_REQUEST_CODE = 1010
     private val stackViewModel: RestaurantStackViewModel by viewModel()
@@ -33,6 +39,8 @@ class RestaurantStackActivity : AppCompatActivity() {
     }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var binding: ActivityMainBinding
+    private val manager by lazy { CardStackLayoutManager(this, this) }
+    private val adapter by lazy { RestaurantStackAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +48,7 @@ class RestaurantStackActivity : AppCompatActivity() {
 
         requestLocationPermission()
 
-        val manager = CardStackLayoutManager(this)
-        val adapter = RestaurantStackAdapter()
+
         binding.cardStackView.layoutManager = manager
         binding.cardStackView.adapter = adapter
 
@@ -58,7 +65,17 @@ class RestaurantStackActivity : AppCompatActivity() {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         })
         stackViewModel.swipe.observe(this, Observer {
+            val setting = SwipeAnimationSetting.Builder()
+                .setDirection(it)
+                .setDuration(200)
+                .setInterpolator(AccelerateInterpolator())
+
+                .build()
+            manager.setSwipeAnimationSetting(setting)
             binding.cardStackView.swipe()
+        })
+        stackViewModel.openRestaurantsLiked.observe(this, Observer {
+            startActivity(Intent(this, RestaurantListingActivity::class.java))
         })
     }
 
@@ -105,5 +122,24 @@ class RestaurantStackActivity : AppCompatActivity() {
             else -> {
             }
         }
+    }
+
+    override fun onCardDisappeared(view: View?, position: Int) {
+    }
+
+    override fun onCardDragging(direction: Direction?, ratio: Float) {
+    }
+
+    override fun onCardSwiped(direction: Direction) {
+        stackViewModel.onSwipe(direction, manager.topPosition)
+    }
+
+    override fun onCardCanceled() {
+    }
+
+    override fun onCardAppeared(view: View?, position: Int) {
+    }
+
+    override fun onCardRewound() {
     }
 }
