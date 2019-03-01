@@ -7,6 +7,6 @@ import org.koin.android.ext.android.startKoin
 class WhereToLunchApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        startKoin(this, listOf(KoinModule().getModule()))
+        startKoin(this, listOf(KoinModule().getModule(this)))
     }
 }
