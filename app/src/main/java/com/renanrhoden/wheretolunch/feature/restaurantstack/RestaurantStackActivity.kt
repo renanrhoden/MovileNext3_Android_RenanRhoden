@@ -2,7 +2,6 @@ package com.renanrhoden.wheretolunch.feature.restaurantstack
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -75,7 +74,7 @@ class RestaurantStackActivity : AppCompatActivity(), CardStackListener {
             binding.cardStackView.swipe()
         })
         stackViewModel.openRestaurantsLiked.observe(this, Observer {
-            startActivity(Intent(this, RestaurantListingActivity::class.java))
+            startActivity(RestaurantListingActivity.getIntent(this, it))
         })
     }
 
@@ -117,7 +116,6 @@ class RestaurantStackActivity : AppCompatActivity(), CardStackListener {
                 } else {
                     requestLocationPermission()
                 }
-                return
             }
             else -> {
             }

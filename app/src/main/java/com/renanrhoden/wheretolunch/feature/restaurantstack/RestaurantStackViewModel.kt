@@ -1,6 +1,5 @@
 package com.renanrhoden.wheretolunch.feature.restaurantstack
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.renanrhoden.wheretolunch.database.entities.Restaurant
@@ -52,7 +51,9 @@ class RestaurantStackViewModel(
         val it = places.results
             .also { this@RestaurantStackViewModel.places = it }
             .map(RestaurantMapper::toRestaurantCardViewModel)
+
         val resultsSize = it.size
+
         if (resultsSize >= NUMBER_RESTAURANTS_TO_SHOW) {
             onSuccess.value = it.subList(0, NUMBER_RESTAURANTS_TO_SHOW)
         } else {
@@ -79,7 +80,7 @@ class RestaurantStackViewModel(
             insertDatabaseSwipedRestaurant(topPosition)
         }
 
-        if (topPosition == max_restaurants){
+        if (topPosition == max_restaurants) {
             restaurantsRepository.getAll()
                 .subscribeBy {
                     openRestaurantsLiked.value = it
@@ -89,11 +90,7 @@ class RestaurantStackViewModel(
 
     private fun insertDatabaseSwipedRestaurant(topPosition: Int) {
         places?.let {
-            try {
-                restaurantsRepository.insert(toRestaurant(it[topPosition - 1]))
-            } catch (e: Throwable){
-                Log.i("DEBUG INSERT", e.message)
-            }
+            restaurantsRepository.insert(toRestaurant(it[topPosition - 1]))
         }
     }
 }
