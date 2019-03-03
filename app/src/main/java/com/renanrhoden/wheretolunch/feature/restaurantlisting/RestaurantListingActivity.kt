@@ -27,7 +27,6 @@ class RestaurantListingActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(context)
         }
 
-
     }
 
     companion object {

@@ -116,7 +116,6 @@ class RestaurantStackActivity : AppCompatActivity(), CardStackListener {
                 } else {
                     requestLocationPermission()
                 }
-                return
             }
             else -> {
             }
